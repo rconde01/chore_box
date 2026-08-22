@@ -3,9 +3,9 @@
 A wireless "ask and answer" device for a nine-year-old, designed from a blank Fusion 360 sketch through
 soldering, 3D printing, and firmware. My daughter came up with the idea; I built it.
 
-![Chore Box demo](media/demo.gif)
+https://github.com/user-attachments/assets/27aa0a09-d0bb-4de4-b348-cb98920f44db
 
-*([higher-quality video](media/demo.mp4))*
+*(Turn the sound on — the box plays a recording of my voice saying the word.)*
 
 ## The idea
 
