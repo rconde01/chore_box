@@ -5,7 +5,7 @@ soldering, 3D printing, and firmware. My daughter came up with the idea; I built
 
 ![Chore Box demo](media/demo.gif)
 
-<a href="https://github.com/user-attachments/assets/27aa0a09-d0bb-4de4-b348-cb98920f44db" target="_blank" rel="noopener noreferrer"><b>▶ Watch the full clip with sound</b></a> — the box plays a recording of my voice saying the word.
+<a href="https://github.com/user-attachments/assets/9ae32d3d-ac2b-4bfa-8aff-e03311b34ef0" target="_blank" rel="noopener noreferrer"><b>▶ Watch the full clip with sound</b></a> — the box plays a recording of my voice saying the word.
 
 ## The idea
 
