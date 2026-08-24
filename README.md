@@ -139,6 +139,7 @@ component placement had to work backward from an ergonomic shell.
 ```
 cad/
   sign.f3d          Fusion 360 model of the sign box
+  remote.f3d        Fusion 360 model of the remote
 firmware/
   common/           ESP-NOW setup/teardown, message framing, small atomic + mutex helpers
   remote/           button polling, color states, light sleep, reply timeout
@@ -146,7 +147,7 @@ firmware/
 media/              renders, interior shots, demo clip
 ```
 
-*(TBD — remote CAD and the Fritzing schematic to be added.)*
+*(TBD — the Fritzing schematic to be added.)*
 
 ---
 
@@ -160,4 +161,4 @@ media/              renders, interior shots, demo clip
 - [ ] Enclosure revision count
 - [ ] How the sign labels themselves are made (printed on the paper diffuser? separate inlay?)
 - [ ] Rough project duration, and whether it's still in daily use
-- [ ] Push the remote CAD and the schematic into this repo
+- [ ] Push the Fritzing schematic into this repo
