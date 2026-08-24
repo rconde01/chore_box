@@ -15,7 +15,7 @@ that a kid actually enjoys running.
 1. I press one of four icon buttons on the remote — dog, cat, Sophia, coffee.
 2. The box lights the matching sign (**NOODLE**, **SONNY**, **SOPHIA**, **COFFEE**) and plays a recording of
    my voice saying the word through its onboard speaker.
-3. My daughter answers with the green or red button on top of the box.
+3. My daughter answers with the green or red button on top of the box. Noodle is the dog, Sonny is the cat.
 4. The remote's window pulses green if she agreed, red if she refused.
 
 Each chore owns a color, and both halves use it: press the coffee button and the remote glows purple while
@@ -25,8 +25,8 @@ the COFFEE sign glows purple across the room. The pending state is the color of 
 |---|---|
 | Coffee | purple |
 | Sophia | orange |
-| Dog | blue |
-| Cat | yellow |
+| Dog (Noodle) | blue |
+| Cat (Sonny) | yellow |
 
 The coffee button is for my wife.
 
@@ -61,13 +61,15 @@ goes back to sleep — so a message dropped in either direction can't leave a si
 </p>
 
 Four backlit label windows in a 2×2 grid on the front, green and red response buttons on top, speaker firing
-up through a printed grille. Behind each window is an [Adafruit NeoPixel
+up through a printed grille. The letters are printed into the enclosure itself — the sign face is one part,
+with paper behind it doing the diffusing. Behind each window is an [Adafruit NeoPixel
 Stick](https://www.adafruit.com/product/1426) — 8 pixels each, 32 in one chain off a single pin — with paper
 as the diffuser. Voice clips come off a 30 × 11 mm voice-prompt module with the speaker built into it —
 16 MB of onboard flash holding one recording per chore, played by index over a second UART. No SD card, no
 separate amplifier.
 
 The box stays awake and polls its two buttons every 2 ms, so the answer registers the instant she hits it.
+That's affordable because it's the half that stays plugged in — nothing here has to survive on a battery.
 
 ### The remote
 
@@ -80,11 +82,16 @@ A wand form factor sized for one hand: four icon buttons under the thumb, a diff
 and a USB port at the tail for charging. Packing a microcontroller, radio, indicator, and battery into that
 cross-section was most of the design work.
 
-The window isn't a display — it's three RGB backlight panels behind paper, driven as nine PWM channels so the
-whole face washes to one color. That's what makes the yes/no answer readable from across a room: an
-eight-second breathing pulse of green or red, not a symbol you have to walk over and read.
+The window isn't a display. It reads like a dot matrix, but the dots are printed into the face — behind them
+are paper and three [Adafruit RGB Full Color Backlight
+Displays](https://www.adafruit.com/product/6158), 12 × 40 mm strips driven as nine PWM channels so the whole
+face washes to a single color. They're common anode, which is why the firmware writes `255 - value` and why
+there's a row of resistors in the middle of that protoboard.
 
-The remote is the half that has to last on a battery, so it spends nearly all of its life in light sleep at
+That's what makes the yes/no answer readable from across a room: an eight-second breathing pulse of green or
+red, not a symbol you have to walk over and read.
+
+The remote is the only half on a battery, so it spends nearly all of its life in light sleep at
 80 MHz with the radio torn down entirely. A button press wakes it, the radio comes up, the message goes out,
 and everything shuts back down after the answer.
 
@@ -98,7 +105,7 @@ and everything shuts back down after the answer.
 | Sign lighting | 4 × Adafruit NeoPixel Stick, 8 pixels each, 32 total on one data pin |
 | Remote indicator | 3 × RGB backlight panels, 9 LEDC PWM channels at 5 kHz / 8-bit |
 | Diffusion | Paper, behind the sign windows and the remote's face |
-| Power | LiPo, **TBD — capacity and measured runtime** |
+| Power | Remote runs on a LiPo (**TBD — capacity and measured runtime**); the sign box stays on USB |
 | Enclosures | 3D printed on a Bambu Lab X1C |
 
 ## What I had to learn
@@ -121,8 +128,14 @@ side table, and a remote that feels right in a hand.
 
 ## Problems worth talking about
 
-**The wireless link took several attempts.** *(TBD — which approaches failed and why, and what finally sent
-me to ESP-NOW. This is the most interesting story in the project.)*
+**Plain WiFi was the wrong tool.** The first version had both halves join the house network. Waking a sleeping
+ESP32 and getting it associated and addressed took far too long to sit behind a button press — and worse, it
+wasn't consistent, so the wait was a different length every time. A button whose response time you can't
+predict reads as broken, even when the message always arrives.
+
+ESP-NOW deleted the entire problem. There's no association, no DHCP, no router in the path — each board has
+the other's MAC compiled in and just transmits. That's also what makes sleeping the remote practical: the
+radio can come up, send, and be torn down inside the window where a person is still expecting a response.
 
 **Battery life meant sleeping the remote.** It wakes on any of the four buttons, brings up the radio, and
 tears it back down before sleeping again — the radio is only alive for the seconds it's actually needed. The
@@ -154,11 +167,7 @@ media/              renders, interior shots, demo clip
 
 ### To fill in before publishing — delete this section
 
-- [ ] Which wireless approaches failed before ESP-NOW, and how they failed
-- [ ] Exact RGB backlight panel part used in the remote
-- [ ] LiPo capacity, measured runtime, and what the target was
-- [ ] Which of NOODLE / SONNY is the dog and which is the cat
+- [ ] Remote LiPo capacity, measured runtime, and what the target was
 - [ ] Enclosure revision count
-- [ ] How the sign labels themselves are made (printed on the paper diffuser? separate inlay?)
 - [ ] Rough project duration, and whether it's still in daily use
 - [ ] Push the Fritzing schematic into this repo
