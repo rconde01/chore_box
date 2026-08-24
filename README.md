@@ -63,8 +63,9 @@ goes back to sleep — so a message dropped in either direction can't leave a si
 Four backlit label windows in a 2×2 grid on the front, green and red response buttons on top, speaker firing
 up through a printed grille. Behind each window is an [Adafruit NeoPixel
 Stick](https://www.adafruit.com/product/1426) — 8 pixels each, 32 in one chain off a single pin — with paper
-as the diffuser. Voice clips come off a serial MP3 voice-prompt module driven over a second UART, one track
-per chore.
+as the diffuser. Voice clips come off a 30 × 11 mm voice-prompt module with the speaker built into it —
+16 MB of onboard flash holding one recording per chore, played by index over a second UART. No SD card, no
+separate amplifier.
 
 The box stays awake and polls its two buttons every 2 ms, so the answer registers the instant she hits it.
 
@@ -93,7 +94,7 @@ and everything shuts back down after the answer.
 |---|---|
 | Microcontrollers | Adafruit HUZZAH32 (ESP32 Feather) — one per half, on 50×70 mm protoboard |
 | Wireless | ESP-NOW, unencrypted, peer MACs hard-coded, ASCII `CMD <verb>` payloads |
-| Audio | Serial MP3 voice-prompt module (`7E … EF` command frames, 9600 baud) into a small speaker |
+| Audio | [Voice-prompt module with integrated speaker](https://www.amazon.com/dp/B0DQQ3W32D) — 30 × 11 mm, 16 MB onboard flash, `7E … EF` frames at 9600 baud |
 | Sign lighting | 4 × Adafruit NeoPixel Stick, 8 pixels each, 32 total on one data pin |
 | Remote indicator | 3 × RGB backlight panels, 9 LEDC PWM channels at 5 kHz / 8-bit |
 | Diffusion | Paper, behind the sign windows and the remote's face |
@@ -154,7 +155,6 @@ media/              renders, interior shots, demo clip
 ### To fill in before publishing — delete this section
 
 - [ ] Which wireless approaches failed before ESP-NOW, and how they failed
-- [ ] Exact MP3 voice-prompt module part number
 - [ ] Exact RGB backlight panel part used in the remote
 - [ ] LiPo capacity, measured runtime, and what the target was
 - [ ] Which of NOODLE / SONNY is the dog and which is the cat
