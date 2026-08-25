@@ -118,15 +118,105 @@ and everything shuts back down after the answer.
 | Power | Remote runs on a 1100 mAh 3.7 V LiPo; the sign box stays on USB |
 | Enclosures | 3D printed on a Bambu Lab X1C |
 
+**On the HUZZAH32:** a reasonably priced wireless board small enough to fit the remote's cross-section. The
+remote was the binding constraint, so both halves ended up on the same board — the box has room to spare.
+
+## Firmware
+
+Arduino toolchain, C++, split across two sketches with a shared header for the radio.
+[Source: `./firmware`](./firmware)
+
+### The protocol
+
+Both halves talk in plain ASCII strings prefixed with `CMD `. That's the entire wire format — no binary
+packing, no versioning, no acknowledgment beyond ESP-NOW's own delivery callback.
+
+| Verb | Direction | Meaning |
+|---|---|---|
+| `coffee` `sophia` `dog` `cat` | remote → box | light that sign and play its clip |
+| `yes` `no` | box → remote | she answered |
+| `disable` | remote → box | request timed out, clear the sign |
+
+`disable` is the one that matters for robustness. Without it, a remote that gives up would leave a sign lit
+across the room with nothing coming to turn it off.
+
+### Pins
+
+| Sign box | |
+|---|---|
+| **GPIO 4** (A5) | NeoPixel data — all 32 pixels on one chain, brightness 200/255 |
+| **GPIO 14** | Green / yes button, `INPUT_PULLUP` |
+| **GPIO 33** | Red / no button, `INPUT_PULLUP` |
+| **GPIO 16 / 17** | Voice prompter UART, `HardwareSerial(1)` at 9600 |
+
+| Remote | |
+|---|---|
+| **GPIO 27 / 33 / 14 / 32** | The four chore buttons, `INPUT_PULLUP`, and the wake sources |
+| **GPIO 22 / 25 / 26** | Backlight 1, R / G / B |
+| **GPIO 23 / 5 / 4** | Backlight 2, R / G / B |
+| **GPIO 16 / 21 / 17** | Backlight 3, R / G / B |
+
+The nine backlight channels run on the ESP32's LEDC peripheral at 5 kHz, 8-bit. Because the strips are common
+anode, every write is inverted — `ledcWrite(pin, 255 - value)` — which reads wrong until you remember the
+brightness is set by how hard you pull the cathode down.
+
+### The remote is a state machine that sleeps
+
+The remote's `loop()` is a switch over six states, and two of them exist only to bracket the radio:
+
+```
+idle ──button──▶ button_pressed ──▶ waiting_for_reply ──┬── yes ──┐
+  ▲                    │                                ├── no ───┤
+  │                    └── send failed ──▶ shutdown ◀────┴─90 s────┘
+  └────────────────────────────────────────────┘
+```
+
+`button_pressed` brings ESP-NOW up and sends; `shutdown` tears it back down and calls
+`esp_light_sleep_start()`. The radio only exists for the seconds between those two states. The rest of the
+time the chip is asleep at 80 MHz with WiFi deinitialized entirely, waiting on an `ext1` wake armed across all
+four button pins.
+
+That ordering is the whole battery strategy, and it only works because ESP-NOW has no association step. A
+design that had to rejoin a network on every wake couldn't afford to tear the radio down in the first place.
+
+### The answer is a cosine
+
+The pulse that reports yes or no is a blocking loop — the remote has nothing else to do while it runs, and it
+sleeps the moment it finishes:
+
+```cpp
+void long_pulse_color_blocking(Data & data, Color color){
+  int num_steps = 4*1024;
+  int delay_value = 2;
+  int num_cycles = 10;
+
+  for(int i = 0; i < num_steps; ++i){
+    float step = 1.0f - (float)i / (float)(num_steps - 1);
+    auto level = 1.0f - (1.0f + cosf(num_cycles*step*2*M_PI))/2.0;
+
+    set_color(data, Color{(int)(color.r*level), (int)(color.g*level), (int)(color.b*level)});
+    delay(delay_value);
+  }
+}
+```
+
+4096 steps at 2 ms is about eight seconds, and ten cosine cycles across it gives ten breaths. Starting the
+cosine at its peak means `level` starts at zero, so the window ramps up from dark rather than snapping on.
+
+### The box doesn't sleep
+
+The sign box has no sleep code at all. It sets up, then polls its two buttons every 2 ms forever. That's a
+luxury the remote can't afford and the box doesn't need to — it's the half that stays plugged in, and polling
+that fast means the answer registers on contact rather than on the next scheduler tick.
+
 ## What I had to learn
 
 None of this was in my wheelhouse when I started.
 
 **CAD and printing** — Fusion 360 from scratch: parametric sketching, joints, and designing enclosures that
 are actually printable. Bambu Studio, supports, orientation, and the fit tolerances. Both enclosures went
-through multiple print revisions before the components dropped in cleanly. Actually I used a service for
-the first print, and then sprung for the X1C after getting it wrong and realizing it was going to take
-a few more iterations.
+through multiple print revisions before the components dropped in cleanly — including one outsourced print
+that came back wrong in five separate ways. That's what convinced me to buy the printer; see below.
 
 **Electronics** — Choosing the parts at all: which Feather, which MP3 module, what the LEDs and speaker
 needed, how to power it. Then soldering the whole thing together by hand on protoboard.
@@ -159,6 +249,50 @@ of the room, which is where you are when you're waiting on an answer.
 
 **Packaging.** The remote's cross-section was set by what feels good to hold, not by what fits inside, so
 component placement had to work backward from an ergonomic shell.
+
+## Design for print and assembly
+
+**The first version was printed as a single piece, and that was the mistake.** A one-piece body meant there
+was no way to get a screwdriver to the internal components — everything had to be reachable to be mounted, and
+nothing was. Splitting it into a top and a bottom is what made the box assemblable at all, and most of the
+revisions after that were about how those two halves meet.
+
+**The first print was outsourced, and almost nothing fit.** Before buying the X1C I sent the box to a print
+service, which turned one slow iteration into a very slow one. What came back:
+
+- The posts for screwing down the NeoPixel sticks snapped off as soon as I drove screws into them.
+- The buttons were too small, so the icons on them came out distorted.
+- The face plate didn't fit inside the box.
+- The speaker wouldn't seat in its receptacle.
+- The NeoPixel cavities left nowhere to feed the wires through.
+
+Five separate fit failures in one print, none of which could be checked without the physical part in hand.
+Buying the printer was a direct consequence: at that iteration count, owning the loop was cheaper than renting
+it.
+
+**The button icons are traced by hand.** Dog, cat, Sophia, and coffee were made by pulling up silhouette
+reference images and tracing them with bezier curves in Fusion, then printing the result as raised geometry on
+the button faces.
+
+**The sign inserts needed a stencil font and a finer nozzle.** The letters are cut clean through the insert,
+so an ordinary font falls apart — the middle of an **O** has nothing holding it. A stencil-capable font solves
+that by leaving connecting bridges in every enclosed counter. Except at 0.4 mm those bridges were thinner than
+the nozzle could lay down and simply vanished, taking the insert's letters with them. Dropping to a **0.2 mm
+nozzle** resolved it.
+
+**The signs slide in.** Making them separate inserts rather than part of the face was partly a printing
+decision and partly a hedge — the chores a nine-year-old has aren't the chores she'll have in two years, and
+a new set of signs is a small print rather than a new box.
+
+## What I'd do differently
+
+- **A custom PCB.** The same conclusion I reached on the hair clip project. Both halves are currently hand-
+  soldered protoboard, and on the remote that board *is* the size constraint — a proper PCB would shrink the
+  remote significantly, which is the one dimension anybody actually notices when they pick it up.
+- **A better joint between the box's top and bottom.** Splitting the body was the right call, but the way the
+  two halves come together deserves a few more iterations to hold more securely than it does now.
+- **Play with the colors.** Everything is printed in black right now. White for the outside with black signs
+  would read better, and it's the kind of change that costs nothing but a reprint.
 
 ## Repo contents
 
