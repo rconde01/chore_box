@@ -1,6 +1,6 @@
 # Chore Box
 
-A wireless "ask and answer" device for a my daughter, designed from a blank Fusion 360 sketch through
+A wireless "ask and answer" device for my daughter, designed from a blank Fusion 360 sketch through
 soldering, 3D printing, and firmware. My daughter came up with the idea; I built it.
 
 ![Chore Box demo](media/demo.gif)
@@ -66,6 +66,13 @@ Voice clips come off a 30 × 11 mm voice-prompt module with the speaker built in
 16 MB of onboard flash holding one recording per chore, played by index over a second UART. No SD card, no
 separate amplifier.
 
+The two response buttons are illuminated, so the answer she's about to give is lit under her hand.
+
+<img src="media/box_fritz.png" width="100%" alt="Fritzing wiring diagram of the sign box: HUZZAH32, four chained NeoPixel sticks, the MP3 voice prompter, and the two illuminated buttons">
+
+The four sticks chain into one run off a single data pin, with the usual NeoPixel precautions — a series
+resistor on the data line and a bulk capacitor across the supply. The voice prompter hangs off its own UART.
+
 The box stays awake and polls its two buttons every 2 ms, so the answer registers the instant she hits it.
 That's affordable because it's the half that stays plugged in — nothing here has to survive on a battery.
 
@@ -88,6 +95,12 @@ face washes to a single color. They're common anode, which is why the firmware w
 That's what makes the yes/no answer readable from across a room: an eight-second breathing pulse of green or
 red, not a symbol you have to walk over and read.
 
+<img src="media/remote_fritz.png" width="100%" alt="Fritzing wiring diagram of the remote: HUZZAH32, 1100 mAh LiPo, four tactile buttons, and three RGB backlights with a resistor per channel">
+
+Fritzing has no part for the backlight strips, so they're drawn as plain RGB LEDs — the topology is the same,
+nine channels each through its own resistor. The four buttons are the wake sources: any one of them pulls the
+ESP32 out of light sleep.
+
 The remote is the only half on a battery, so it spends nearly all of its life in light sleep at
 80 MHz with the radio torn down entirely. A button press wakes it, the radio comes up, the message goes out,
 and everything shuts back down after the answer.
@@ -102,7 +115,7 @@ and everything shuts back down after the answer.
 | Sign lighting | 4 × Adafruit NeoPixel Stick, 8 pixels each, 32 total on one data pin |
 | Remote indicator | 3 × RGB backlight panels, 9 LEDC PWM channels at 5 kHz / 8-bit |
 | Diffusion | Paper, behind the sign windows |
-| Power | Remote runs on a LiPo; the sign box stays on USB |
+| Power | Remote runs on a 1100 mAh 3.7 V LiPo; the sign box stays on USB |
 | Enclosures | 3D printed on a Bambu Lab X1C |
 
 ## What I had to learn
@@ -129,8 +142,8 @@ side table, and a remote that feels right in a hand.
 
 **Plain WiFi was the wrong tool.** The first version had both halves join the house network. Waking a sleeping
 ESP32 and getting it associated and addressed took far too long to sit behind a button press — and worse, it
-wasn't consistent, so the wait was a different length every time - or just failed. A button whose response time you can't
-predict reads as broken, even when the message always arrives.
+wasn't consistent, so the wait was a different length every time — or just failed. A button whose response
+time you can't predict reads as broken, even when the message always arrives.
 
 ESP-NOW deleted the entire problem. There's no association, no DHCP, no router in the path — each board has
 the other's MAC compiled in and just transmits. That's also what makes sleeping the remote practical: the
@@ -157,14 +170,13 @@ firmware/
   common/           ESP-NOW setup/teardown, message framing, small atomic + mutex helpers
   remote/           button polling, color states, light sleep, reply timeout
   sign/             NeoPixel sign lighting, MP3 playback, yes/no buttons
-media/              renders, interior shots, demo clip
+media/              renders, schematics, interior shots, demo clip
 ```
 
 ---
 
 ### To fill in before publishing — delete this section
 
-- [ ] Remote LiPo capacity, measured runtime, and what the target was
+- [ ] Measured runtime on the remote's 1100 mAh cell, and what the target was
 - [ ] Enclosure revision count
 - [ ] Rough project duration, and whether it's still in daily use
-- [ ] Push the Fritzing schematic into this repo
