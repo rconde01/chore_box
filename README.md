@@ -1,6 +1,6 @@
 # Chore Box
 
-A wireless "ask and answer" device for a nine-year-old, designed from a blank Fusion 360 sketch through
+A wireless "ask and answer" device for a my daughter, designed from a blank Fusion 360 sketch through
 soldering, 3D printing, and firmware. My daughter came up with the idea; I built it.
 
 ![Chore Box demo](media/demo.gif)
@@ -9,8 +9,8 @@ soldering, 3D printing, and firmware. My daughter came up with the idea; I built
 
 ## The idea
 
-Nagging is a broadcast protocol with no acknowledgment. This replaces it with a request/response handshake
-that a kid actually enjoys running.
+We have common things we might ask our daughter to do on any given day. Instead of yelling throughout the
+house, we can use this remote control interface. Now my partner can request coffee without speaking a word.
 
 1. I press one of four icon buttons on the remote — dog, cat, Sophia, coffee.
 2. The box lights the matching sign (**NOODLE**, **SONNY**, **SOPHIA**, **COFFEE**) and plays a recording of
@@ -27,8 +27,6 @@ the COFFEE sign glows purple across the room. The pending state is the color of 
 | Sophia | orange |
 | Dog (Noodle) | blue |
 | Cat (Sonny) | yellow |
-
-The coffee button is for my wife.
 
 ## How it works
 
@@ -61,10 +59,10 @@ goes back to sleep — so a message dropped in either direction can't leave a si
 </p>
 
 Four backlit label windows in a 2×2 grid on the front, green and red response buttons on top, speaker firing
-up through a printed grille. The letters are printed into the enclosure itself — the sign face is one part,
+up through a printed grille. The letters are printed into slide in panels which sit in front of light cavity,
 with paper behind it doing the diffusing. Behind each window is an [Adafruit NeoPixel
-Stick](https://www.adafruit.com/product/1426) — 8 pixels each, 32 in one chain off a single pin — with paper
-as the diffuser. Voice clips come off a 30 × 11 mm voice-prompt module with the speaker built into it —
+Stick](https://www.adafruit.com/product/1426) — 8 pixels each, 32 in one chain off a single pin.
+Voice clips come off a 30 × 11 mm voice-prompt module with the speaker built into it —
 16 MB of onboard flash holding one recording per chore, played by index over a second UART. No SD card, no
 separate amplifier.
 
@@ -83,10 +81,9 @@ and a USB port at the tail for charging. Packing a microcontroller, radio, indic
 cross-section was most of the design work.
 
 The window isn't a display. It reads like a dot matrix, but the dots are printed into the face — behind them
-are paper and three [Adafruit RGB Full Color Backlight
+are three [Adafruit RGB Full Color Backlight
 Displays](https://www.adafruit.com/product/6158), 12 × 40 mm strips driven as nine PWM channels so the whole
-face washes to a single color. They're common anode, which is why the firmware writes `255 - value` and why
-there's a row of resistors in the middle of that protoboard.
+face washes to a single color. They're common anode, which is why the firmware writes `255 - value`.
 
 That's what makes the yes/no answer readable from across a room: an eight-second breathing pulse of green or
 red, not a symbol you have to walk over and read.
@@ -104,17 +101,19 @@ and everything shuts back down after the answer.
 | Audio | [Voice-prompt module with integrated speaker](https://www.amazon.com/dp/B0DQQ3W32D) — 30 × 11 mm, 16 MB onboard flash, `7E … EF` frames at 9600 baud |
 | Sign lighting | 4 × Adafruit NeoPixel Stick, 8 pixels each, 32 total on one data pin |
 | Remote indicator | 3 × RGB backlight panels, 9 LEDC PWM channels at 5 kHz / 8-bit |
-| Diffusion | Paper, behind the sign windows and the remote's face |
-| Power | Remote runs on a LiPo (**TBD — capacity and measured runtime**); the sign box stays on USB |
+| Diffusion | Paper, behind the sign windows |
+| Power | Remote runs on a LiPo; the sign box stays on USB |
 | Enclosures | 3D printed on a Bambu Lab X1C |
 
 ## What I had to learn
 
-None of this was in my wheelhouse when I started. The point of the project was that it wasn't.
+None of this was in my wheelhouse when I started.
 
 **CAD and printing** — Fusion 360 from scratch: parametric sketching, joints, and designing enclosures that
-are actually printable. Bambu Studio, supports, orientation, and the fit tolerances you only learn by getting
-them wrong. Both enclosures went through **TBD** print revisions before the components dropped in cleanly.
+are actually printable. Bambu Studio, supports, orientation, and the fit tolerances. Both enclosures went
+through multiple print revisions before the components dropped in cleanly. Actually I used a service for
+the first print, and then sprung for the X1C after getting it wrong and realizing it was going to take
+a few more iterations.
 
 **Electronics** — Choosing the parts at all: which Feather, which MP3 module, what the LEDs and speaker
 needed, how to power it. Then soldering the whole thing together by hand on protoboard.
@@ -130,7 +129,7 @@ side table, and a remote that feels right in a hand.
 
 **Plain WiFi was the wrong tool.** The first version had both halves join the house network. Waking a sleeping
 ESP32 and getting it associated and addressed took far too long to sit behind a button press — and worse, it
-wasn't consistent, so the wait was a different length every time. A button whose response time you can't
+wasn't consistent, so the wait was a different length every time - or just failed. A button whose response time you can't
 predict reads as broken, even when the message always arrives.
 
 ESP-NOW deleted the entire problem. There's no association, no DHCP, no router in the path — each board has
@@ -139,7 +138,7 @@ radio can come up, send, and be torn down inside the window where a person is st
 
 **Battery life meant sleeping the remote.** It wakes on any of the four buttons, brings up the radio, and
 tears it back down before sleeping again — the radio is only alive for the seconds it's actually needed. The
-design problem is waking fast enough that a button press feels instant. *(TBD — measured runtime.)*
+design problem is waking fast enough that a button press feels instant.
 
 **The answer had to be readable at a glance.** A check mark on a small display is something you have to walk
 over and read. A slow pulse of green or red across the whole face is something you catch from the other side
@@ -160,8 +159,6 @@ firmware/
   sign/             NeoPixel sign lighting, MP3 playback, yes/no buttons
 media/              renders, interior shots, demo clip
 ```
-
-*(TBD — the Fritzing schematic to be added.)*
 
 ---
 
