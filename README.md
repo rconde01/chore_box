@@ -5,7 +5,7 @@ soldering, 3D printing, and firmware. My daughter came up with the idea; I built
 
 ![Chore Box demo](media/demo.gif)
 
-[**▶ Watch the full clip with sound**](media/demo.mp4) - the box plays a recording of my voice saying the word.
+[**▶ Watch the full clip with sound**](https://github.com/user-attachments/assets/8d35b82a-c8e0-47bb-88b0-e17c1cc6b25d) - the box plays a recording of my voice saying the word.
 
 ## The idea
 
@@ -67,8 +67,8 @@ Voice clips come off a 30 × 11 mm voice-prompt module with the speaker built in
 separate amplifier.
 
 The two response buttons are wired to be illuminated, so the answer she's about to give would be lit under
-her hand. As far as I can tell those LEDs either never worked or I burned them out, and I never replaced
-them.
+her hand. As far as I can tell those LEDs either never worked or I burned them out - and I didn't want to
+hold the project up waiting on replacements.
 
 <img src="media/box_fritz.png" width="100%" alt="Fritzing wiring diagram of the sign box: HUZZAH32, four chained NeoPixel sticks, the MP3 voice prompter, and the two response buttons">
 
