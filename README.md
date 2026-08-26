@@ -3,8 +3,6 @@
 A wireless "ask and answer" device, designed from a blank Fusion 360 sketch through
 soldering, 3D printing, and firmware. My daughter came up with the idea; I built it.
 
-![The sign box with SONNY lit green, and the remote in hand with its face glowing](media/hero.jpg)
-
 ![Chore Box demo](media/demo.gif)
 
 [**▶ Watch the full clip with sound**](https://github.com/user-attachments/assets/8d35b82a-c8e0-47bb-88b0-e17c1cc6b25d) - the box plays a recording of my voice saying the word.
