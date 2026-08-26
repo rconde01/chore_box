@@ -1,6 +1,6 @@
 # Chore Box
 
-A wireless "ask and answer" device for my daughter, designed from a blank Fusion 360 sketch through
+A wireless "ask and answer" device, designed from a blank Fusion 360 sketch through
 soldering, 3D printing, and firmware. My daughter came up with the idea; I built it.
 
 ![Chore Box demo](media/demo.gif)
@@ -13,9 +13,9 @@ We have common things we might ask our daughter to do on any given day. Instead 
 house, we can use this remote control interface. Now my partner can request coffee without speaking a word.
 
 1. I press one of four icon buttons on the remote - dog, cat, Sophia, coffee.
-2. The box lights the matching sign (**NOODLE**, **SONNY**, **SOPHIA**, **COFFEE**) and plays a recording of
-   my voice saying the word through its onboard speaker.
-3. My daughter answers with the green or red button on top of the box. Noodle is the dog, Sonny is the cat.
+2. The box lights the matching sign - **NOODLE** the dog, **SONNY** the cat, **SOPHIA**, **COFFEE** - and
+   plays a recording of my voice saying the word through its onboard speaker.
+3. My daughter answers with the green or red button on top of the box.
 4. The remote's window pulses green if she agreed, red if she refused.
 
 Each chore owns a color, and both halves use it: press the coffee button and the remote glows purple while
@@ -59,24 +59,21 @@ goes back to sleep - so a message dropped in either direction can't leave a sign
 </p>
 
 Four backlit label windows in a 2×2 grid on the front, green and red response buttons on top, speaker firing
-up through a printed grille. The letters are printed into slide in panels which sit in front of light cavity,
-with paper behind it doing the diffusing. Behind each window is an [Adafruit NeoPixel
+up through a printed grille. The letters are printed into slide-in panels which sit in front of a light
+cavity, with paper behind them doing the diffusing. Behind each window is an [Adafruit NeoPixel
 Stick](https://www.adafruit.com/product/1426) - 8 pixels each, 32 in one chain off a single pin.
 Voice clips come off a 30 × 11 mm voice-prompt module with the speaker built into it -
 16 MB of onboard flash holding one recording per chore, played by index over a second UART. No SD card, no
 separate amplifier.
 
-The two response buttons are illuminated, so the answer she's about to give is lit under her hand (well 
-actually it's wired up that way but as far as I could tell the button LEDs either never worked or I 
-accidentally burned them out and didn't wait to order new ones).
+The two response buttons are wired to be illuminated, so the answer she's about to give would be lit under
+her hand. As far as I can tell those LEDs either never worked or I burned them out, and I never replaced
+them.
 
-<img src="media/box_fritz.png" width="100%" alt="Fritzing wiring diagram of the sign box: HUZZAH32, four chained NeoPixel sticks, the MP3 voice prompter, and the two illuminated buttons">
+<img src="media/box_fritz.png" width="100%" alt="Fritzing wiring diagram of the sign box: HUZZAH32, four chained NeoPixel sticks, the MP3 voice prompter, and the two response buttons">
 
 The four sticks chain into one run off a single data pin, with the usual NeoPixel precautions - a series
 resistor on the data line and a bulk capacitor across the supply. The voice prompter hangs off its own UART.
-
-The box stays awake and polls its two buttons every 2 ms, so the answer registers the instant she hits it.
-That's affordable because it's the half that stays plugged in - nothing here has to survive on a battery.
 
 ### The remote
 
@@ -288,9 +285,9 @@ a new set of signs is a small print rather than a new box.
 
 ## What I'd do differently
 
-- **A custom PCB.** Both halves are currently hand-soldered protoboard. The remote uses 3 protoboards - 
-  one for the microcontroller, one for the buttons, and one for the LEDs- a proper PCB would 
-  allow combining at least 2 of those which would shrink the remote significantly.
+- **A custom PCB.** Both halves are currently hand-soldered protoboard. The remote uses three of them - one
+  for the microcontroller, one for the buttons, one for the LEDs. A proper PCB would combine at least two of
+  those and shrink the remote significantly.
 - **A better joint between the box's top and bottom.** Splitting the body was the right call, but the way the
   two halves come together deserves a few more iterations to hold more securely than it does now.
 - **Play with the colors.** Everything is printed in black right now. White for the outside with black signs
@@ -309,5 +306,3 @@ firmware/
   sign/             NeoPixel sign lighting, MP3 playback, yes/no buttons
 media/              renders, schematics, interior shots, demo clip
 ```
-
----
